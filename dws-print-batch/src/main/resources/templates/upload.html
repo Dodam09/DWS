@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DWS 작업일보 업로드</title>
+
+    <!-- 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f1f3f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 50px 20px;
+            margin: 0;
+            color: #333;
+        }
+
+        .upload-card {
+            background: white;
+            width: 500px;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* --------------------------- */
+        /* 업로드 박스 디자인 */
+        /* --------------------------- */
+        .upload-box {
+            border: 2px dashed #6c7ae0;
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8f9ff;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.25s;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .upload-box:hover {
+            background: #eef0ff;
+        }
+
+        .upload-icon {
+            font-size: 26px;
+        }
+
+        .upload-text {
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .upload-main {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .upload-sub {
+            font-size: 13px;
+            color: #777;
+        }
+
+        /* 파일 input 숨기기 */
+        #file {
+            display: none;
+        }
+
+        /* 버튼 */
+        button {
+            width: 100%;
+            padding: 12px 0;
+            background: #4b7bec;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        button:hover {
+            background: #3867d6;
+        }
+
+        /* 업로드된 파일명 */
+        #fileName {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="upload-card">
+
+    <h1>DWS 작업일보 업로드</h1>
+
+    <p class="desc">
+        ZIP 파일을 업로드하면<br>
+        구인/구직 접수대장이 자동으로 생성됩니다.
+    </p>
+
+    <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+
+        <!-- 업로드 박스 -->
+        <div class="upload-box" onclick="document.getElementById('file').click()">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">
+                <div class="upload-main">ZIP 파일을 여기로 끌어다 놓거나</div>
+                <div class="upload-sub">클릭하여 파일을 선택하세요</div>
+            </div>
+        </div>
+
+        <input type="file" id="file" name="file" accept=".zip" required onchange="showFileName(event)">
+
+        <div id="fileName"></div>
+
+        <button type="submit">접수대장 생성하기</button>
+
+    </form>
+
+</div>
+
+<script>
+    function showFileName(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('fileName').innerText = '선택된 파일: ' + file.name;
+        } else {
+            document.getElementById('fileName').innerText = '';
+        }
+    }
+</script>
+
+</body>
+</html>

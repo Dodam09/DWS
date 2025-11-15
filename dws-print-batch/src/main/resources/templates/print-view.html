@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DWS 구인/구직 접수대장</title>
+
+    <!-- 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f2f3f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* 고정 헤더 */
+        .header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #ddd;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        ul {
+            padding: 0;
+            list-style: none;
+            margin: 0;
+            font-size: 15px;
+        }
+
+        ul li {
+            margin: 4px 0;
+        }
+
+        #printAllBtn {
+            margin-top: 10px;
+            padding: 10px 18px;
+            background: #4b7bec;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        #printAllBtn:hover {
+            background: #3867d6;
+        }
+
+        /* 메인 2컬럼 */
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* 네비 / 검색 */
+        .nav-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .nav-box input {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .nav-box button {
+            padding: 8px 14px;
+            background: #6c7ae0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .nav-box button:hover {
+            background: #5a68d1;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: #444;
+            margin-left: auto;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* 페이지 보이기 */
+        .seeker-page, .offer-page {
+            display: none;
+        }
+
+        .page-active {
+            display: block;
+        }
+
+        /* 표 */
+        table {
+            border-collapse: collapse; 
+            width: 100%;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        th {
+            background: #eef0ff;
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-weight: 600;
+            width: 120px;
+        }
+
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        h3 {
+            margin: 12px 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* 인쇄 */
+		/* 인쇄용 (프린트 전용 스타일) */
+		@media print {
+		    /* 전체 기본 */
+		    body {
+		        background: #ffffff !important;
+		        margin: 10mm;
+		        padding: 0;
+		    }
+
+		    /* 화면용 헤더 / 버튼 / 검색 UI 숨기기 */
+		    .header,
+		    #printAllBtn,
+		    .nav-box {
+		        display: none !important;
+		    }
+
+		    /* 2컬럼 레이아웃 해제하고 세로로 꽉 채우기 */
+		    .container {
+		        display: block;
+		        padding: 0;
+		    }
+
+		    .card {
+		        box-shadow: none;
+		        border: none;
+		        padding: 0;
+		        margin: 0 0 8mm 0;
+		    }
+
+		    /* 사람/업체 한 그룹 박스 */
+			.seeker-page,
+			  .offer-page {
+			      display: block !important;
+			      margin: 0 0 4mm 0 !important;
+			      page-break-inside: avoid !important;  /* 그룹 중간에 잘리지 않도록 */
+			      page-break-after: always !important;  /* 한 그룹 끝나면 바로 다음 페이지 */
+			  }
+			  
+			  .seeker-page:last-child,
+			  .offer-page:last-child {
+			      page-break-after: auto !important;
+			  }
+
+		    /* 표 압축 모드 */
+		    table {
+		        border-collapse: collapse;
+		        width: 100%;
+		        font-size: 10px !important;        /* 화면보다 더 작게 */
+		        margin-bottom: 2mm !important;
+		    }
+
+		    th,
+		    td {
+		        padding: 2px 4px !important;       /* 줄 간격 줄이기 */
+		        border: 0.3pt solid #000 !important;
+		    }
+
+		    /* 헤더 배경색 제거 (복사 잘 나오게 흑백) */
+		    th {
+		        background: #ffffff !important;
+		        font-weight: 700;
+		    }
+
+		    /* 제목들 간격 줄이기 */
+		    h2 {
+		        font-size: 14px;
+		        margin: 0 0 2mm 0;
+		    }
+
+		    h3 {
+		        margin: 4px 0 4px 0 !important;
+		        font-size: 11px !important;
+		    }
+		}
+
+
+
+    </style>
+</head>
+
+<body>
+
+<!-- ========================= -->
+<!-- 고정 헤더 -->
+<!-- ========================= -->
+<div class="header">
+    <h1>DWS 구인 / 구직 접수대장</h1>
+
+    <ul>
+        <li>구직 접수대장 그룹: <span th:text="${jobSeekerCount}"></span> 건</li>
+        <li>구인 접수대장 그룹: <span th:text="${jobOfferCount}"></span> 건</li>
+        <li>총 근무자: <span th:text="${workerCount}"></span> 명</li>
+        <li>총 업체: <span th:text="${companyCount}"></span> 개</li>
+    </ul>
+
+    <button id="printAllBtn" onclick="window.print()">전체 인쇄</button>
+</div>
+
+
+<!-- ========================= -->
+<!-- 메인 2컬럼 -->
+<!-- ========================= -->
+<div class="container">
+
+    <!-- ============================= -->
+    <!-- 왼쪽: 구직대장 -->
+    <!-- ============================= -->
+    <div class="column card">
+        <h2>구직접수대장</h2>
+
+        <!-- 검색 / 네비 -->
+        <div class="nav-box">
+            <input type="text" id="seekerSearch" placeholder="이름 검색">
+            <button onclick="searchSeeker()">검색</button>
+            <button onclick="prevSeeker()">◀</button>
+            <button onclick="nextSeeker()">▶</button>
+            <div class="page-info" id="seekerPageInfo"></div>
+        </div>
+
+        <!-- 페이지 -->
+        <div id="seekerPages">
+            <div th:each="group : ${jobSeekerGroups}" class="seeker-page">
+
+                <table>
+                    <tr><th>성명</th><td th:text="${group.workerName}"></td><th>생년월일</th><td th:text="${group.birthDate}"></td></tr>
+                    <tr><th>주소</th><td colspan="3" th:text="${group.address}"></td></tr>
+                    <tr><th>희망직종</th><td th:text="${group.desiredJob}"></td><th>자격 및 기능</th><td>-</td></tr>
+                </table>
+
+                <h3>직업소개 실적</h3>
+
+                <table>
+                    <thead>
+                        <tr><th>일자</th><th>사업체명</th><th>입금</th><th>소개요금</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${group.items}">
+                            <td th:text="${item.date}"></td>
+                            <td th:text="${item.companyName}"></td>
+                            <td th:text="${item.income}"></td>
+                            <td th:text="${item.fee}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- 오른쪽: 구인대장 -->
+    <!-- ============================= -->
+    <div class="column card">
+        <h2>구인접수대장</h2>
+
+        <!-- 검색 / 네비 -->
+        <div class="nav-box">
+            <input type="text" id="offerSearch" placeholder="업체 검색">
+            <button onclick="searchOffer()">검색</button>
+            <button onclick="prevOffer()">◀</button>
+            <button onclick="nextOffer()">▶</button>
+            <div class="page-info" id="offerPageInfo"></div>
+        </div>
+
+        <!-- 페이지 -->
+        <div id="offerPages">
+            <div th:each="group : ${jobOfferGroups}" class="offer-page">
+
+                <table>
+                    <tr><th>사업체명</th><td th:text="${group.companyName}"></td><th>전화번호</th><td th:text="${group.phone}"></td></tr>
+                    <tr><th>소재지</th><td colspan="3" th:text="${group.address}"></td></tr>
+                    <tr><th>직종</th><td th:text="${group.jobType}"></td><th>성별</th><td>남자</td></tr>
+                </table>
+
+                <h3>구인접수 실적</h3>
+
+                <table>
+                    <thead>
+                        <tr><th>일자</th><th>근무자</th><th>전/조공</th><th>임금</th><th>소개요금</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${group.items}">
+                            <td th:text="${item.date}"></td>
+                            <td th:text="${item.workerName}"></td>
+                            <td th:text="${item.grade}"></td>
+                            <td th:text="${item.wage}"></td>
+                            <td th:text="${item.fee}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* --- 검색 기능 --- */
+    function searchSeeker() {
+        const q = document.getElementById('seekerSearch').value.trim();
+        if (!q) return;
+
+        const pages = document.querySelectorAll('.seeker-page');
+        for (let i = 0; i < pages.length; i++) {
+            // 각 페이지에서 첫 번째 td = 성명
+            const nameCell = pages[i].querySelector('table tr:first-child td:nth-child(2)');
+            if (!nameCell) continue;
+
+            const name = nameCell.innerText.trim();
+            if (name.includes(q)) {
+                showSeekerPage(i);
+                return;
+            }
+        }
+        alert('해당 이름을 찾을 수 없습니다.');
+    }
+
+    function searchOffer() {
+        const q = document.getElementById('offerSearch').value.trim();
+        if (!q) return;
+
+        const pages = document.querySelectorAll('.offer-page');
+        for (let i = 0; i < pages.length; i++) {
+            // 각 페이지에서 첫 번째 td = 업체명
+            const companyCell = pages[i].querySelector('table tr:first-child td:nth-child(2)');
+            if (!companyCell) continue;
+
+            const company = companyCell.innerText.trim();
+            if (company.includes(q)) {
+                showOfferPage(i);
+                return;
+            }
+        }
+        alert('해당 업체를 찾을 수 없습니다.');
+    }
+
+    /* --- 페이지 이동 --- */
+    let seekerIndex = 0;
+    let offerIndex = 0;
+
+    function showSeekerPage(i) {
+        const pages = document.querySelectorAll('.seeker-page');
+        const info = document.getElementById('seekerPageInfo');
+
+        if (pages.length === 0) {
+            if (info) info.textContent = '0 / 0';
+            return;
+        }
+
+        i = Math.max(0, Math.min(i, pages.length - 1));
+        seekerIndex = i;
+
+        pages.forEach((p, idx) => {
+            p.classList.toggle('page-active', idx === seekerIndex);
+        });
+
+        if (info) {
+            info.textContent = (seekerIndex + 1) + ' / ' + pages.length;
+        }
+    }
+
+    function showOfferPage(i) {
+        const pages = document.querySelectorAll('.offer-page');
+        const info = document.getElementById('offerPageInfo');
+
+        if (pages.length === 0) {
+            if (info) info.textContent = '0 / 0';
+            return;
+        }
+
+        i = Math.max(0, Math.min(i, pages.length - 1));
+        offerIndex = i;
+
+        pages.forEach((p, idx) => {
+            p.classList.toggle('page-active', idx === offerIndex);
+        });
+
+        if (info) {
+            info.textContent = (offerIndex + 1) + ' / ' + pages.length;
+        }
+    }
+
+    function prevSeeker() { showSeekerPage(seekerIndex - 1); }
+    function nextSeeker() { showSeekerPage(seekerIndex + 1); }
+    function prevOffer() { showOfferPage(offerIndex - 1); }
+    function nextOffer() { showOfferPage(offerIndex + 1); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showSeekerPage(0);
+        showOfferPage(0);
+    });
+</script>
+
