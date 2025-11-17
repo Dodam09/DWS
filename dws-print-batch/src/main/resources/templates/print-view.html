@@ -44,8 +44,12 @@
             margin: 4px 0;
         }
 
-        #printAllBtn {
+        /* ▶ 버튼 3개 스타일 통합 */
+        #printAllBtn,
+        #printSeekerBtn,
+        #printOfferBtn {
             margin-top: 10px;
+            margin-right: 6px;
             padding: 10px 18px;
             background: #4b7bec;
             color: white;
@@ -56,7 +60,9 @@
             font-size: 15px;
         }
 
-        #printAllBtn:hover {
+        #printAllBtn:hover,
+        #printSeekerBtn:hover,
+        #printOfferBtn:hover {
             background: #3867d6;
         }
 
@@ -161,83 +167,90 @@
         }
 
         /* 인쇄 */
-		/* 인쇄용 (프린트 전용 스타일) */
-		@media print {
-		    /* 전체 기본 */
-		    body {
-		        background: #ffffff !important;
-		        margin: 10mm;
-		        padding: 0;
-		    }
+        @media print {
+            /* 전체 기본 */
+            body {
+                background: #ffffff !important;
+                margin: 10mm;
+                padding: 0;
+            }
 
-		    /* 화면용 헤더 / 버튼 / 검색 UI 숨기기 */
-		    .header,
-		    #printAllBtn,
-		    .nav-box {
-		        display: none !important;
-		    }
+            /* 화면용 헤더 / 버튼 / 검색 UI 숨기기 */
+            .header,
+            #printAllBtn,
+            #printSeekerBtn,
+            #printOfferBtn,
+            .nav-box {
+                display: none !important;
+            }
 
-		    /* 2컬럼 레이아웃 해제하고 세로로 꽉 채우기 */
-		    .container {
-		        display: block;
-		        padding: 0;
-		    }
+            /* 2컬럼 레이아웃 해제하고 세로로 꽉 채우기 */
+            .container {
+                display: block;
+                padding: 0;
+            }
 
-		    .card {
-		        box-shadow: none;
-		        border: none;
-		        padding: 0;
-		        margin: 0 0 8mm 0;
-		    }
+            .card {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                margin: 0 0 8mm 0;
+            }
 
-		    /* 사람/업체 한 그룹 박스 */
-			.seeker-page,
-			  .offer-page {
-			      display: block !important;
-			      margin: 0 0 4mm 0 !important;
-			      page-break-inside: avoid !important;  /* 그룹 중간에 잘리지 않도록 */
-			      page-break-after: always !important;  /* 한 그룹 끝나면 바로 다음 페이지 */
-			  }
-			  
-			  .seeker-page:last-child,
-			  .offer-page:last-child {
-			      page-break-after: auto !important;
-			  }
+            /* 사람/업체 한 그룹 박스 */
+            .seeker-page,
+            .offer-page {
+                display: block !important;
+                margin: 0 0 4mm 0 !important;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
+            }
 
-		    /* 표 압축 모드 */
-		    table {
-		        border-collapse: collapse;
-		        width: 100%;
-		        font-size: 10px !important;        /* 화면보다 더 작게 */
-		        margin-bottom: 2mm !important;
-		    }
+            .seeker-page:last-child,
+            .offer-page:last-child {
+                page-break-after: auto !important;
+            }
 
-		    th,
-		    td {
-		        padding: 2px 4px !important;       /* 줄 간격 줄이기 */
-		        border: 0.3pt solid #000 !important;
-		    }
+            /* ▶ 여기서 프린트 모드에 따라 한쪽만 숨기기 */
+            body.print-seeker-only #offerColumn {
+                display: none !important;
+            }
 
-		    /* 헤더 배경색 제거 (복사 잘 나오게 흑백) */
-		    th {
-		        background: #ffffff !important;
-		        font-weight: 700;
-		    }
+            body.print-offer-only #seekerColumn {
+                display: none !important;
+            }
 
-		    /* 제목들 간격 줄이기 */
-		    h2 {
-		        font-size: 14px;
-		        margin: 0 0 2mm 0;
-		    }
+            /* 표 압축 모드 */
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 10px !important;
+                margin-bottom: 2mm !important;
+            }
 
-		    h3 {
-		        margin: 4px 0 4px 0 !important;
-		        font-size: 11px !important;
-		    }
-		}
+            th,
+            td {
+                padding: 2px 4px !important;
+                border: 0.3pt solid #000 !important;
+            }
 
+            /* 헤더 배경색 제거 */
+            th {
+                background: #ffffff !important;
+                font-weight: 700;
+            }
 
+            /* 제목들 간격 줄이기 */
+            h2 {
+                font-size: 14px;
+                margin: 0 0 2mm 0;
+            }
 
+            h3 {
+                margin: 4px 0 4px 0 !important;
+                font-size: 11px !important;
+            }
+        }
     </style>
 </head>
 
@@ -256,7 +269,10 @@
         <li>총 업체: <span th:text="${companyCount}"></span> 개</li>
     </ul>
 
-    <button id="printAllBtn" onclick="window.print()">전체 인쇄</button>
+    <!-- ▶ 버튼 세 개로 분리 -->
+    <button id="printSeekerBtn" onclick="printSeekers()">구직대장만 인쇄</button>
+    <button id="printOfferBtn" onclick="printOffers()">구인대장만 인쇄</button>
+    <button id="printAllBtn" onclick="printAll()">전체 인쇄</button>
 </div>
 
 
@@ -265,10 +281,8 @@
 <!-- ========================= -->
 <div class="container">
 
-    <!-- ============================= -->
     <!-- 왼쪽: 구직대장 -->
-    <!-- ============================= -->
-    <div class="column card">
+    <div class="column card" id="seekerColumn">
         <h2>구직접수대장</h2>
 
         <!-- 검색 / 네비 -->
@@ -311,10 +325,8 @@
     </div>
 
 
-    <!-- ============================= -->
     <!-- 오른쪽: 구인대장 -->
-    <!-- ============================= -->
-    <div class="column card">
+    <div class="column card" id="offerColumn">
         <h2>구인접수대장</h2>
 
         <!-- 검색 / 네비 -->
@@ -367,7 +379,6 @@
 
         const pages = document.querySelectorAll('.seeker-page');
         for (let i = 0; i < pages.length; i++) {
-            // 각 페이지에서 첫 번째 td = 성명
             const nameCell = pages[i].querySelector('table tr:first-child td:nth-child(2)');
             if (!nameCell) continue;
 
@@ -386,7 +397,6 @@
 
         const pages = document.querySelectorAll('.offer-page');
         for (let i = 0; i < pages.length; i++) {
-            // 각 페이지에서 첫 번째 td = 업체명
             const companyCell = pages[i].querySelector('table tr:first-child td:nth-child(2)');
             if (!companyCell) continue;
 
@@ -454,5 +464,34 @@
         showSeekerPage(0);
         showOfferPage(0);
     });
+
+    /* --- 인쇄 모드 제어 --- */
+    function clearPrintMode() {
+        document.body.classList.remove('print-seeker-only', 'print-offer-only');
+    }
+
+    function printAll() {
+        clearPrintMode();      // 둘 다 보이게
+        window.print();
+    }
+
+    function printSeekers() {
+        clearPrintMode();
+        document.body.classList.add('print-seeker-only');
+        window.print();
+    }
+
+    function printOffers() {
+        clearPrintMode();
+        document.body.classList.add('print-offer-only');
+        window.print();
+    }
+
+    // 인쇄가 끝나면 모드 초기화
+    window.onafterprint = function () {
+        clearPrintMode();
+    };
 </script>
 
+</body>
+</html>
